@@ -29,8 +29,15 @@ public class AuthController {
             }
         } else {
             System.out.println("FirestoreService is not initialized. AuthController will work without Firestore.");
-            // Perform alternative login logic without Firestore
-            // ...
+            // Check if the provided username and password match the hardcoded values
+            if (isValidCredentials(felhasználónév, jelszó)) {
+                // Login successful (without Firestore)
+                System.out.println("Login successful (offline mode).");
+                return true;
+            } else {
+                // Invalid credentials
+                return false;
+            }
         }
         return false;
     }
