@@ -1,18 +1,43 @@
 package org.example.services;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import org.example.models.Task;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class FirestoreService {
     private final Firestore db;
     private String loggedInUser;
 
     public FirestoreService() {
-        // Initialize Firestore
-        db = FirestoreClient.getFirestore();
+        Firestore firestore = null;
+        try {
+            if (FirebaseApp.getApps().isEmpty()) {
+                FileInputStream serviceAccount = new FileInputStream("path/to/serviceAccountKey.json");
+
+                FirebaseOptions options = new FirebaseOptions.Builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .build();
+
+                FirebaseApp.initializeApp(options);
+            }
+            firestore = FirestoreClient.getFirestore();
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            firestore = FirestoreClient.getFirestore();
+        } finally {
+            this.db = firestore;
+        }
     }
 
     public void addTask(String collection, Task task) {
