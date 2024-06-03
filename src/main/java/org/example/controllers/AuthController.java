@@ -8,7 +8,13 @@ public class AuthController {
     private String jelszó;
 
     public AuthController(FirestoreService firestoreService, String[] felhasználónevek, String jelszó) {
-        this.firestoreService = firestoreService;
+        if (firestoreService.isInitialized()) {
+            this.firestoreService = firestoreService;
+            // Perform Firestore-specific initialization here
+        } else {
+            this.firestoreService = null;
+            System.err.println("FirestoreService is not initialized. AuthController will work without Firestore.");
+        }
         this.felhasználónevek = felhasználónevek;
         this.jelszó = jelszó;
     }

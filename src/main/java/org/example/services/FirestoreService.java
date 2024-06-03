@@ -57,4 +57,8 @@ public class FirestoreService {
             loggedInUser = null;
         }
     }
+
+    public boolean isInitialized() {
+        return this.db != null;
+    }
 }

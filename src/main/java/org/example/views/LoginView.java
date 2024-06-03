@@ -10,12 +10,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LoginView extends JPanel {
-    public static final String[] FELHASZNÁLÓNEVEK = {"admin", "user1", "user2"};
-    public static final String JELSZÓ = "password";
+
+    public static final String[] FELHASZNÁLÓNEVEK = {"borisz", "trisztanv", "davidartur"};
+    public static final String JELSZÓ = "1234";
 
     private AuthController authController;
 
-    private JTextField felhasználónévTextField;
+    private JComboBox<String> felhasználónévComboBox;  // Use JComboBox for usernames
     private JPasswordField jelszóPasswordField;
     private JButton bejelentkezésButton;
 
@@ -23,14 +24,14 @@ public class LoginView extends JPanel {
         FirestoreService firestoreService = new FirestoreService();
         this.authController = new AuthController(firestoreService, FELHASZNÁLÓNEVEK, JELSZÓ);
 
-        felhasználónévTextField = new JTextField(20);
+        felhasználónévComboBox = new JComboBox<>(FELHASZNÁLÓNEVEK);  // Initialize JComboBox
         jelszóPasswordField = new JPasswordField(20);
         bejelentkezésButton = new JButton("Bejelentkezés");
 
         bejelentkezésButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String felhasználónév = felhasználónévTextField.getText();
+                String felhasználónév = (String) felhasználónévComboBox.getSelectedItem(); // Get from JComboBox
                 String jelszó = new String(jelszóPasswordField.getPassword());
 
                 if (authController.login(felhasználónév, jelszó)) {
@@ -51,7 +52,7 @@ public class LoginView extends JPanel {
         add(new JLabel("Felhasználónév:"), constraints);
 
         constraints.gridx = 1;
-        add(felhasználónévTextField, constraints);
+        add(felhasználónévComboBox, constraints); // Add JComboBox instead of JTextField
 
         constraints.gridx = 0;
         constraints.gridy = 1;
