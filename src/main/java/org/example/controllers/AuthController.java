@@ -20,11 +20,17 @@ public class AuthController {
     }
 
     public boolean login(String felhasználónév, String jelszó) {
-        // Check if the provided username and password are valid
-        if (isValidCredentials(felhasználónév, jelszó)) {
-            // Perform login logic using FirestoreService
-            firestoreService.login(felhasználónév);
-            return true;
+        if (firestoreService != null && firestoreService.isInitialized()) {
+            // Check if the provided username and password are valid
+            if (isValidCredentials(felhasználónév, jelszó)) {
+                // Perform login logic using FirestoreService
+                firestoreService.login(felhasználónév);
+                return true;
+            }
+        } else {
+            System.out.println("FirestoreService is not initialized. AuthController will work without Firestore.");
+            // Perform alternative login logic without Firestore
+            // ...
         }
         return false;
     }
