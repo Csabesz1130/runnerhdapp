@@ -16,15 +16,16 @@ public class MainFrame extends JFrame {
     private UserManagementController userManagementController;
     private ReportsController reportsController;
     private SettingsController settingsController;
+    private LoginView loginView;
+    private JPanel mainView;
 
     private CardLayout cardLayout;
     private JPanel mainPanel;
 
     public MainFrame() {
         FirestoreService firestoreService = new FirestoreService();
-        this.authController = new AuthController();
+        this.authController = new AuthController(firestoreService, LoginView.FELHASZNÁLÓNEVEK, LoginView.JELSZÓ);
         this.taskController = new TaskController(firestoreService);
-
 
         initUI();
     }
@@ -34,20 +35,21 @@ public class MainFrame extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        loginView = new LoginView(this);
+        mainView = new JPanel(cardLayout);
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
         // Create and add views
         mainPanel.add(new DashboardView(dashboardController), "Dashboard");
-        mainPanel.add(new LoginView(authController), "Login");
         mainPanel.add(new NotificationsView(notificationsController), "Notifications");
         mainPanel.add(new ReportsView(reportsController), "Reports");
         mainPanel.add(new SettingsView(settingsController), "Settings");
         mainPanel.add(new TaskView(taskController, new Task()), "Tasks");
         mainPanel.add(new UserManagementView(userManagementController), "UserManagement");
 
-        add(mainPanel, BorderLayout.CENTER);
+        add(loginView, BorderLayout.CENTER);
 
         // Menu bar
         JMenuBar menuBar = new JMenuBar();
@@ -88,6 +90,13 @@ public class MainFrame extends JFrame {
 
     private void showView(String viewName) {
         cardLayout.show(mainPanel, viewName);
+    }
+
+    public void showMainView() {
+        getContentPane().removeAll();
+        getContentPane().add(mainView, BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
