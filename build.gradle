@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    //classpath 'com.google.gms:google-services:4.3.10'
+    implementation 'com.google.firebase:firebase-admin:8.1.0'
+    // Google API Client Library
+    implementation 'com.google.api-client:google-api-client:1.31.5'
+    implementation 'com.google.oauth-client:google-oauth-client:1.32.1' // Updated version
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+application {
+    mainClass = 'org.example.Main'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+}
