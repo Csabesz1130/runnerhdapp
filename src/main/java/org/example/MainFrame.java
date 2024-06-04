@@ -92,6 +92,9 @@ public class MainFrame extends JFrame {
     }
 
     private void showView(JComponent view) {
+        if (view instanceof TaskView) {
+            view = new TaskView(taskController, new Task());
+        }
         mainView.removeAll();
         mainView.add(view, BorderLayout.CENTER);
         mainView.revalidate();
@@ -154,7 +157,7 @@ public class MainFrame extends JFrame {
         tasksMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showView(new TaskView(taskController));
+                showView(new TaskView(taskController, new Task()));
             }
         });
         menu.add(tasksMenuItem);
