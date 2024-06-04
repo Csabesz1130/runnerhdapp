@@ -18,10 +18,8 @@ public class TaskView extends JPanel {
     private JTextArea megjegyzesTextArea;
     private JButton frissitesButton;
 
-    public TaskView(TaskController taskController, Task task) {
+    public TaskView(TaskController taskController) {
         this.taskController = taskController;
-        this.task = task;
-
         initComponents();
     }
 

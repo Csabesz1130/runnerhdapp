@@ -7,6 +7,8 @@ import org.example.services.FirestoreService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
     private TaskController taskController;
@@ -46,7 +48,7 @@ public class MainFrame extends JFrame {
         mainPanel.add(new NotificationsView(notificationsController), "Notifications");
         mainPanel.add(new ReportsView(reportsController), "Reports");
         mainPanel.add(new SettingsView(settingsController), "Settings");
-        mainPanel.add(new TaskView(taskController, new Task()), "Tasks");
+        mainPanel.add(new TaskView(taskController), "Tasks");
         mainPanel.add(new UserManagementView(userManagementController), "UserManagement");
 
         add(loginView, BorderLayout.CENTER);
@@ -56,25 +58,25 @@ public class MainFrame extends JFrame {
         JMenu menu = new JMenu("Menu");
 
         JMenuItem dashboardMenuItem = new JMenuItem("Dashboard");
-        dashboardMenuItem.addActionListener(e -> showView("Dashboard"));
+        dashboardMenuItem.addActionListener(e -> showView(new DashboardView(dashboardController)));
 
         JMenuItem loginMenuItem = new JMenuItem("Login");
-        loginMenuItem.addActionListener(e -> showView("Login"));
+        loginMenuItem.addActionListener(e -> showLoginView());
 
         JMenuItem notificationsMenuItem = new JMenuItem("Notifications");
-        notificationsMenuItem.addActionListener(e -> showView("Notifications"));
+        notificationsMenuItem.addActionListener(e -> showView(new NotificationsView(notificationsController)));
 
         JMenuItem reportsMenuItem = new JMenuItem("Reports");
-        reportsMenuItem.addActionListener(e -> showView("Reports"));
+        reportsMenuItem.addActionListener(e -> showView(new ReportsView(reportsController)));
 
         JMenuItem settingsMenuItem = new JMenuItem("Settings");
-        settingsMenuItem.addActionListener(e -> showView("Settings"));
+        settingsMenuItem.addActionListener(e -> showView(new SettingsView(settingsController)));
 
         JMenuItem tasksMenuItem = new JMenuItem("Tasks");
-        tasksMenuItem.addActionListener(e -> showView("Tasks"));
+        tasksMenuItem.addActionListener(e -> showView(new TaskView(taskController)));
 
         JMenuItem userManagementMenuItem = new JMenuItem("User Management");
-        userManagementMenuItem.addActionListener(e -> showView("UserManagement"));
+        userManagementMenuItem.addActionListener(e -> showView(new UserManagementView(userManagementController)));
 
         menu.add(dashboardMenuItem);
         menu.add(loginMenuItem);
@@ -88,13 +90,108 @@ public class MainFrame extends JFrame {
         setJMenuBar(menuBar);
     }
 
-    private void showView(String viewName) {
-        cardLayout.show(mainPanel, viewName);
+    private void showView(JComponent view) {
+        mainView.removeAll();
+        mainView.add(view, BorderLayout.CENTER);
+        mainView.revalidate();
+        mainView.repaint();
     }
 
     public void showMainView() {
+        if (mainView == null) {
+            mainView = new JPanel(new BorderLayout());
+            mainPanel.add(mainView, "Main");
+        }
+
+        // Remove the login view
+        mainPanel.remove(loginView);
+
+        // Show the main view
+        cardLayout.show(mainPanel, "Main");
+
+        // Initialize and add menu bar
+        menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Menu");
+
+        JMenuItem dashboardMenuItem = new JMenuItem("Dashboard");
+        dashboardMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showView(new DashboardView(dashboardController));
+            }
+        });
+        menu.add(dashboardMenuItem);
+
+        JMenuItem notificationsMenuItem = new JMenuItem("Notifications");
+        notificationsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showView(new NotificationsView(notificationsController));
+            }
+        });
+        menu.add(notificationsMenuItem);
+
+        JMenuItem reportsMenuItem = new JMenuItem("Reports");
+        reportsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showView(new ReportsView(reportsController));
+            }
+        });
+        menu.add(reportsMenuItem);
+
+        JMenuItem settingsMenuItem = new JMenuItem("Settings");
+        settingsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showView(new SettingsView(settingsController));
+            }
+        });
+        menu.add(settingsMenuItem);
+
+        JMenuItem tasksMenuItem = new JMenuItem("Tasks");
+        tasksMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showView(new TaskView(taskController));
+            }
+        });
+        menu.add(tasksMenuItem);
+
+        JMenuItem userManagementMenuItem = new JMenuItem("User Management");
+        userManagementMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showView(new UserManagementView(userManagementController));
+            }
+        });
+        menu.add(userManagementMenuItem);
+
+        JMenuItem logoutMenuItem = new JMenuItem("Logout");
+        logoutMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logout();
+            }
+        });
+        menu.add(logoutMenuItem);
+
+        menuBar.add(menu);
+        setJMenuBar(menuBar);
+
+        revalidate();
+        repaint();
+    }
+
+    private void logout() {
+        authController.logout();
+        showLoginView();
+    }
+
+    public void showLoginView() {
         getContentPane().removeAll();
-        getContentPane().add(mainView, BorderLayout.CENTER);
+        getContentPane().add(loginView, BorderLayout.CENTER);
+        setJMenuBar(null); // Remove the menu bar
         revalidate();
         repaint();
     }
