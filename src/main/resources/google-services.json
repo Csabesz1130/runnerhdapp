@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "513950632981",
+    "project_id": "runnerapp-232cc",
+    "storage_bucket": "runnerapp-232cc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:513950632981:android:e4efc169e959bc8321121c",
+        "android_client_info": {
+          "package_name": "com.festipay.runnerapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0W4a1GA-RzKW6jZPmwc2DzUxZCKKKLcI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
