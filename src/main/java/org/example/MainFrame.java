@@ -20,6 +20,7 @@ public class MainFrame extends JFrame {
     private SettingsController settingsController;
     private LoginView loginView;
     private JPanel mainView;
+    private JMenuBar menuBar;
 
     private CardLayout cardLayout;
     private JPanel mainPanel;
