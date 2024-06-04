@@ -49,7 +49,7 @@ public class MainFrame extends JFrame {
         mainPanel.add(new NotificationsView(notificationsController), "Notifications");
         mainPanel.add(new ReportsView(reportsController), "Reports");
         mainPanel.add(new SettingsView(settingsController), "Settings");
-        mainPanel.add(new TaskView(taskController), "Tasks");
+        mainPanel.add(new TaskView(taskController, new Task()), "Tasks");
         mainPanel.add(new UserManagementView(userManagementController), "UserManagement");
 
         add(loginView, BorderLayout.CENTER);
@@ -74,7 +74,7 @@ public class MainFrame extends JFrame {
         settingsMenuItem.addActionListener(e -> showView(new SettingsView(settingsController)));
 
         JMenuItem tasksMenuItem = new JMenuItem("Tasks");
-        tasksMenuItem.addActionListener(e -> showView(new TaskView(taskController)));
+        tasksMenuItem.addActionListener(e -> showView(new TaskView(taskController, new Task())));
 
         JMenuItem userManagementMenuItem = new JMenuItem("User Management");
         userManagementMenuItem.addActionListener(e -> showView(new UserManagementView(userManagementController)));
