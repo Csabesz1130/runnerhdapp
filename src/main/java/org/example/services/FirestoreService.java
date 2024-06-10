@@ -20,7 +20,7 @@ public class FirestoreService {
         Firestore firestore = null;
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                FileInputStream serviceAccount = new FileInputStream("main/resources/google-services.json");
+                FileInputStream serviceAccount = new FileInputStream("src/main/resources/google-services.json");
 
                 FirebaseOptions options = new FirebaseOptions.Builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
