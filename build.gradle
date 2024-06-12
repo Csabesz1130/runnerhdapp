@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
     //classpath 'com.google.gms:google-services:4.3.10'
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation 'com.google.firebase:firebase-admin:8.1.0'
     // Google API Client Library
     implementation 'com.google.api-client:google-api-client:1.31.5'

@@ -28,7 +28,7 @@ public class TaskView extends JPanel {
         setLayout(new BorderLayout());
 
         JPanel infoPanel = new JPanel(new GridLayout(3, 2));
-        telephelyLabel = new JLabel("Telephely: " + task.getTelephely());
+        telephelyLabel = new JLabel("Telephely: " + task.getTelephelyKod());
         statuszLabel = new JLabel("Státusz:");
         statuszComboBox = new JComboBox<>(new String[]{"Felderítés", "Telepíthető", "Kirakható", "Nem rakható ki"});
         megjegyzesTextArea = new JTextArea(5, 20);
