@@ -5,16 +5,24 @@ public class Task {
     private String name;
     private String description;
     private String telephelyKod;
+    private String telephelyNev;
+    private String statusz;
+    private String megjegyzes;
 
-    // Constructors, getters, and setters
+    // Constructors
     public Task() {}
 
-    public Task(String id, String name, String description) {
+    public Task(String id, String name, String description, String telephelyKod, String telephelyNev, String statusz, String megjegyzes) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.telephelyKod = telephelyKod;
+        this.telephelyNev = telephelyNev;
+        this.statusz = statusz;
+        this.megjegyzes = megjegyzes;
     }
 
+    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -39,14 +47,35 @@ public class Task {
         this.description = description;
     }
 
-    public String getTelephely() {
-        return telephelyKod; // Return the location code
+    public String getTelephelyKod() {
+        return telephelyKod;
     }
 
     public void setTelephelyKod(String telephelyKod) {
         this.telephelyKod = telephelyKod;
     }
 
-    public void setStatusz(String ujStatusz) {
+    public String getTelephelyNev() {
+        return telephelyNev;
+    }
+
+    public void setTelephelyNev(String telephelyNev) {
+        this.telephelyNev = telephelyNev;
+    }
+
+    public String getStatusz() {
+        return statusz;
+    }
+
+    public void setStatusz(String statusz) {
+        this.statusz = statusz;
+    }
+
+    public String getMegjegyzes() {
+        return megjegyzes;
+    }
+
+    public void setMegjegyzes(String megjegyzes) {
+        this.megjegyzes = megjegyzes;
     }
 }

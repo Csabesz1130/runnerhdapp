@@ -4,6 +4,7 @@ import org.example.controllers.*;
 import org.example.models.Task;
 import org.example.views.*;
 import org.example.services.FirestoreService;
+import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
@@ -91,10 +92,9 @@ public class MainFrame extends JFrame {
         setJMenuBar(menuBar);
     }
 
+
+
     private void showView(JComponent view) {
-        if (view instanceof TaskView) {
-            view = new TaskView(taskController, new Task());
-        }
         mainView.removeAll();
         mainView.add(view, BorderLayout.CENTER);
         mainView.revalidate();
@@ -118,70 +118,46 @@ public class MainFrame extends JFrame {
         JMenu menu = new JMenu("Menu");
 
         JMenuItem dashboardMenuItem = new JMenuItem("Dashboard");
-        dashboardMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showView(new DashboardView(dashboardController));
-            }
-        });
+        dashboardMenuItem.addActionListener(e -> showView(new DashboardView(dashboardController)));
         menu.add(dashboardMenuItem);
 
         JMenuItem notificationsMenuItem = new JMenuItem("Notifications");
-        notificationsMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showView(new NotificationsView(notificationsController));
-            }
-        });
+        notificationsMenuItem.addActionListener(e -> showView(new NotificationsView(notificationsController)));
         menu.add(notificationsMenuItem);
 
         JMenuItem reportsMenuItem = new JMenuItem("Reports");
-        reportsMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showView(new ReportsView(reportsController));
-            }
-        });
+        reportsMenuItem.addActionListener(e -> showView(new ReportsView(reportsController)));
         menu.add(reportsMenuItem);
 
         JMenuItem settingsMenuItem = new JMenuItem("Settings");
-        settingsMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showView(new SettingsView(settingsController));
-            }
-        });
+        settingsMenuItem.addActionListener(e -> showView(new SettingsView(settingsController)));
         menu.add(settingsMenuItem);
 
         JMenuItem tasksMenuItem = new JMenuItem("Tasks");
-        tasksMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showView(new TaskView(taskController, new Task()));
-            }
-        });
+        tasksMenuItem.addActionListener(e -> showView(new TaskView(taskController, new Task())));
         menu.add(tasksMenuItem);
 
         JMenuItem userManagementMenuItem = new JMenuItem("User Management");
-        userManagementMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showView(new UserManagementView(userManagementController));
-            }
-        });
+        userManagementMenuItem.addActionListener(e -> showView(new UserManagementView(userManagementController)));
         menu.add(userManagementMenuItem);
 
         JMenuItem logoutMenuItem = new JMenuItem("Logout");
-        logoutMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                logout();
-            }
-        });
+        logoutMenuItem.addActionListener(e -> logout());
         menu.add(logoutMenuItem);
 
         menuBar.add(menu);
         setJMenuBar(menuBar);
+
+        // Import data from Firestore and display it
+        try {
+            List<Task> tasks = taskController.getAllTasks();
+            MainView mainViewPanel = new MainView(authController, this, taskController);
+            mainViewPanel.setTasks(tasks);
+            mainPanel.add(mainViewPanel, "MainView");
+            cardLayout.show(mainPanel, "MainView");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to import data from Firestore: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
 
         revalidate();
         repaint();
