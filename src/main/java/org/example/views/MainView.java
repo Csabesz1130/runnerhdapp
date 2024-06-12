@@ -42,7 +42,7 @@ public class MainView extends JPanel {
         for (Task task : tasks) {
             Object[] rowData = {
                     task.getId(),
-                    task.getTelephely(),
+                    task.getTelephelyKod(),
                     task.getTelephelyNev(),
                     task.getStatusz(),
                     task.getMegjegyzes()
