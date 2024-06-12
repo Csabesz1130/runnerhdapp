@@ -31,12 +31,12 @@ public class LoginView extends JPanel {
         bejelentkezésButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String felhasználónév = (String) felhasználónévComboBox.getSelectedItem(); // Get from JComboBox
+                String felhasználónév = (String) felhasználónévComboBox.getSelectedItem();
                 String jelszó = new String(jelszóPasswordField.getPassword());
 
                 if (authController.login(felhasználónév, jelszó)) {
                     JOptionPane.showMessageDialog(null, "Sikeres bejelentkezés!");
-                    mainFrame.showMainView();
+                    mainFrame.showMainView(); // Call showMainView() after successful login
                 } else {
                     JOptionPane.showMessageDialog(null, "Hibás felhasználónév vagy jelszó!", "Hiba", JOptionPane.ERROR_MESSAGE);
                 }
