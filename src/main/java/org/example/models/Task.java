@@ -1,5 +1,7 @@
 package org.example.models;
 
+import java.util.List;
+
 public class Task {
     private String id;
     private String name;
@@ -8,11 +10,17 @@ public class Task {
     private String telephelyNev;
     private String statusz;
     private String megjegyzes;
+    private List<Equipment> equipmentList;
 
     // Constructors
     public Task() {}
 
-    public Task(String id, String name, String description, String telephelyKod, String telephelyNev, String statusz, String megjegyzes) {
+    public Task(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Task(String id, String name, String description, String telephelyKod, String telephelyNev, String statusz, String megjegyzes, List<Equipment> equipmentList) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -20,6 +28,7 @@ public class Task {
         this.telephelyNev = telephelyNev;
         this.statusz = statusz;
         this.megjegyzes = megjegyzes;
+        this.equipmentList = equipmentList;
     }
 
     // Getters and Setters
@@ -77,5 +86,43 @@ public class Task {
 
     public void setMegjegyzes(String megjegyzes) {
         this.megjegyzes = megjegyzes;
+    }
+
+    public List<Equipment> getEquipmentList() {
+        return equipmentList;
+    }
+
+    public void setEquipmentList(List<Equipment> equipmentList) {
+        this.equipmentList = equipmentList;
+    }
+
+    public static class Equipment {
+        private String snDid;
+        private String type;
+        private String model;
+        private String status;
+
+        public Equipment(String snDid, String type, String model, String status) {
+            this.snDid = snDid;
+            this.type = type;
+            this.model = model;
+            this.status = status;
+        }
+
+        public String getSnDid() {
+            return snDid;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
+        public String getStatus() {
+            return status;
+        }
     }
 }

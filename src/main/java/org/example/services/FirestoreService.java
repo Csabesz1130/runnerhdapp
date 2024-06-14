@@ -184,6 +184,84 @@ public class FirestoreService {
         }
     }
 
+    public List<String> getFestivals() {
+        List<String> festivals = new ArrayList<>();
+        CollectionReference programsCollection = db.collection("Programs");
+        try {
+            QuerySnapshot querySnapshot = programsCollection.get().get();
+            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
+                String festivalName = document.getString("name");
+                festivals.add(festivalName);
+            }
+        } catch (Exception e) {
+            System.err.println("Error retrieving festivals: " + e.getMessage());
+        }
+        return festivals;
+    }
+
+    public Task getCompanyById(String collectionName, String companyId) {
+        DocumentReference companyDocument = db.collection(collectionName).document(companyId);
+        try {
+            DocumentSnapshot documentSnapshot = companyDocument.get().get();
+            if (documentSnapshot.exists()) {
+                return documentSnapshot.toObject(Task.class);
+            }
+        } catch (Exception e) {
+            System.err.println("Error retrieving company: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void createCompany(String collectionName, Task company) {
+        CollectionReference companiesCollection = db.collection(collectionName);
+        companiesCollection.document(company.getId()).set(company);
+    }
+
+    public List<Task.Equipment> getEquipmentList(String collectionName, String companyId) {
+        List<Task.Equipment> equipmentList = new ArrayList<>();
+        DocumentReference companyDocument = db.collection(collectionName).document(companyId);
+        try {
+            DocumentSnapshot documentSnapshot = companyDocument.get().get();
+            if (documentSnapshot.exists()) {
+                Task company = documentSnapshot.toObject(Task.class);
+                if (company != null) {
+                    equipmentList = company.getEquipmentList();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error retrieving equipment list: " + e.getMessage());
+        }
+        return equipmentList;
+    }
+
+    public void updateEquipmentList(String collectionName, String companyId, List<Task.Equipment> equipmentList) {
+        DocumentReference companyDocument = db.collection(collectionName).document(companyId);
+        try {
+            companyDocument.update("equipmentList", equipmentList);
+            System.out.println("Equipment list updated successfully.");
+        } catch (Exception e) {
+            System.err.println("Error updating equipment list: " + e.getMessage());
+        }
+    }
+
+    public List<String> getCompanySuggestions(String searchText) {
+        List<String> suggestions = new ArrayList<>();
+        CollectionReference companiesCollection = db.collection("Company_Install");
+        try {
+            Query query = companiesCollection.whereGreaterThanOrEqualTo("id", searchText)
+                    .whereLessThanOrEqualTo("id", searchText + "\uf8ff")
+                    .limit(5);
+            QuerySnapshot querySnapshot = query.get().get();
+            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
+                String companyId = document.getString("id");
+                suggestions.add(companyId);
+            }
+        } catch (Exception e) {
+            System.err.println("Error retrieving company suggestions: " + e.getMessage());
+        }
+        return suggestions;
+    }
+
     static class User {
         String username;
         String password;

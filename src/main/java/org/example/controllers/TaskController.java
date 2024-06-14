@@ -28,4 +28,24 @@ public class TaskController {
         // Call FirestoreService to update the task in Firebase
         firestoreService.updateTask("tasks", task.getId(), task);
     }
+
+    public List<String> getFestivals() {
+        return firestoreService.getFestivals();
+    }
+
+    public Task getCompanyById(String collectionName, String companyId) {
+        return firestoreService.getCompanyById(collectionName, companyId);
+    }
+
+    public void createCompany(String collectionName, Task company) {
+        firestoreService.createCompany(collectionName, company);
+    }
+
+    public List<Task.Equipment> getEquipmentList(String collectionName, String companyId) {
+        return firestoreService.getEquipmentList(collectionName, companyId);
+    }
+
+    public void updateEquipmentList(String collectionName, String companyId, List<Task.Equipment> equipmentList) {
+        firestoreService.updateEquipmentList(collectionName, companyId, equipmentList);
+    }
 }
