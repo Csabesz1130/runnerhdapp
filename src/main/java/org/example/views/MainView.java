@@ -183,6 +183,17 @@ public class MainView extends JPanel {
         }
     }
 
+    public void setTasks(List<Task> tasks) {
+        // Clear existing data from the company table model
+        companyTableModel.setRowCount(0);
+
+        // Add tasks to the company table model
+        for (Task task : tasks) {
+            Object[] rowData = {task.getId(), task.getName()};
+            companyTableModel.addRow(rowData);
+        }
+    }
+
     private void searchCompany() {
         String companyId = companyIdTextField.getText().trim();
         if (!companyId.isEmpty()) {
