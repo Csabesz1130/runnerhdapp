@@ -43,3 +43,4 @@ bin/
 .DS_Store
 
 src/main/resources/runnerapp-232cc-firebase-adminsdk-2csiq-a0feb0a3ba.json
+src/main/resources/*.json
