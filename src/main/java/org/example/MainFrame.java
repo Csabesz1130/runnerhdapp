@@ -80,7 +80,7 @@ public class MainFrame extends JFrame {
         menuBar = new JMenuBar();
         JMenu menu = new JMenu("Menu");
 
-        JMenuItem dataMenuItem = new JMenuItem("Data1");
+        JMenuItem dataMenuItem = new JMenuItem("Data");
         dataMenuItem.addActionListener(e -> showView("MainView"));
         menu.add(dataMenuItem);
 
