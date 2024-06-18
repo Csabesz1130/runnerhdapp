@@ -22,6 +22,10 @@ public class FirestoreService {
         initializeFirestore();
     }
 
+    public Firestore getFirestore() {
+        return db;
+    }
+
     private void initializeFirestore() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
@@ -76,6 +80,16 @@ public class FirestoreService {
             System.err.println("Firestore is not initialized. Cannot retrieve tasks.");
         }
         return tasks;
+    }
+
+    public void deleteTask(String collection, String id) {
+        if (db != null) {
+            DocumentReference taskDocument = db.collection(collection).document(id);
+            taskDocument.delete();
+            System.out.println("Task deleted successfully.");
+        } else {
+            System.err.println("Firestore is not initialized. Cannot delete task.");
+        }
     }
 
     public void registerUser(String username, String password) {
@@ -155,35 +169,6 @@ public class FirestoreService {
         return db != null;
     }
 
-    public void listenForTaskChanges(String collection) {
-        if (db != null) {
-            CollectionReference tasksCollection = db.collection(collection);
-            tasksCollection.addSnapshotListener((snapshot, error) -> {
-                if (error != null) {
-                    System.err.println("Error listening for task changes: " + error.getMessage());
-                    return;
-                }
-                for (DocumentChange change : snapshot.getDocumentChanges()) {
-                    switch (change.getType()) {
-                        case ADDED:
-                            Task newTask = change.getDocument().toObject(Task.class);
-                            System.out.println("New task added: " + newTask);
-                            break;
-                        case MODIFIED:
-                            Task modifiedTask = change.getDocument().toObject(Task.class);
-                            System.out.println("Task modified: " + modifiedTask);
-                            break;
-                        case REMOVED:
-                            System.out.println("Task removed: " + change.getDocument().getId());
-                            break;
-                    }
-                }
-            });
-        } else {
-            System.err.println("Firestore is not initialized. Cannot listen for task changes.");
-        }
-    }
-
     public List<String> getFestivals() {
         List<String> festivals = new ArrayList<>();
         CollectionReference programsCollection = db.collection("Programs");
@@ -260,6 +245,28 @@ public class FirestoreService {
             System.err.println("Error retrieving company suggestions: " + e.getMessage());
         }
         return suggestions;
+    }
+
+    public List<Task> getCompaniesByFestival(String collectionName, String festivalName) {
+        List<Task> companies = new ArrayList<>();
+        if (db != null) {
+            CollectionReference companiesCollection = db.collection(collectionName);
+            Query query = companiesCollection.whereEqualTo("programName", festivalName);
+            ApiFuture<QuerySnapshot> future = query.get();
+            try {
+                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+                for (QueryDocumentSnapshot document : documents) {
+                    Task company = document.toObject(Task.class);
+                    companies.add(company);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                System.err.println("Failed to retrieve companies: " + e.getMessage());
+            }
+        } else {
+            System.err.println("Firestore is not initialized. Cannot retrieve companies.");
+        }
+        return companies;
     }
 
     static class User {

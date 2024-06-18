@@ -22,8 +22,7 @@ public class MainView extends JPanel {
     private JComboBox<String> festivalComboBox;
     private JRadioButton installationRadioButton;
     private JRadioButton demolitionRadioButton;
-    private JTextField companyIdTextField;
-    private JButton searchCompanyButton;
+    private JButton fetchCompaniesButton;
     private JTable companyTable;
     private DefaultTableModel companyTableModel;
     private JTable equipmentTable;
@@ -45,7 +44,6 @@ public class MainView extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Top panel
         JPanel topPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -77,31 +75,19 @@ public class MainView extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 2;
-        JLabel companyIdLabel = new JLabel("Company ID:");
-        topPanel.add(companyIdLabel, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        companyIdTextField = new JTextField(20);
-        topPanel.add(companyIdTextField, gbc);
-
-        gbc.gridx = 2;
-        gbc.gridy = 2;
-        searchCompanyButton = new JButton("Search");
-        searchCompanyButton.addActionListener(new ActionListener() {
+        fetchCompaniesButton = new JButton("Fetch Companies");
+        fetchCompaniesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                searchCompany();
+                fetchCompanies();
             }
         });
-        topPanel.add(searchCompanyButton, gbc);
+        topPanel.add(fetchCompaniesButton, gbc);
 
         add(topPanel, BorderLayout.NORTH);
 
-        // Tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Company table
         companyTableModel = new DefaultTableModel(new Object[]{"ID", "Name"}, 0);
         companyTable = new JTable(companyTableModel);
         companyTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -119,12 +105,10 @@ public class MainView extends JPanel {
         JScrollPane companyScrollPane = new JScrollPane(companyTable);
         tabbedPane.addTab("Companies", companyScrollPane);
 
-        // Equipment table
         equipmentTableModel = new DefaultTableModel(new Object[]{"SN/DID", "Type", "Model", "Status"}, 0);
         equipmentTable = new JTable(equipmentTableModel);
         JScrollPane equipmentScrollPane = new JScrollPane(equipmentTable);
 
-        // Equipment buttons
         JPanel equipmentButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         addButton = new JButton("Add");
         addButton.addActionListener(new ActionListener() {
@@ -161,7 +145,6 @@ public class MainView extends JPanel {
 
         add(tabbedPane, BorderLayout.CENTER);
 
-        // Bottom panel
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
@@ -184,38 +167,19 @@ public class MainView extends JPanel {
     }
 
     public void setTasks(List<Task> tasks) {
-        // Clear existing data from the company table model
         companyTableModel.setRowCount(0);
 
-        // Add tasks to the company table model
         for (Task task : tasks) {
-            Object[] rowData = {task.getId(), task.getName()};
+            Object[] rowData = {task.getId(), task.getCompanyName()};
             companyTableModel.addRow(rowData);
         }
     }
 
-    private void searchCompany() {
-        String companyId = companyIdTextField.getText().trim();
-        if (!companyId.isEmpty()) {
-            String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
-            Task company = taskController.getCompanyById(collectionName, companyId);
-            if (company != null) {
-                companyTableModel.setRowCount(0);
-                Object[] rowData = {company.getId(), company.getName()};
-                companyTableModel.addRow(rowData);
-                loadEquipmentList(companyId);
-            } else {
-                String companyName = JOptionPane.showInputDialog(this, "Enter company name:");
-                if (companyName != null && !companyName.trim().isEmpty()) {
-                    company = new Task(companyId, companyName);
-                    taskController.createCompany(collectionName, company);
-                    companyTableModel.setRowCount(0);
-                    Object[] rowData = {company.getId(), company.getName()};
-                    companyTableModel.addRow(rowData);
-                    loadEquipmentList(companyId);
-                }
-            }
-        }
+    private void fetchCompanies() {
+        String selectedFestival = (String) festivalComboBox.getSelectedItem();
+        String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
+        List<Task> companies = taskController.getCompaniesByFestival(collectionName, selectedFestival);
+        setTasks(companies);
     }
 
     private void loadEquipmentList(String companyId) {
@@ -308,10 +272,7 @@ public class MainView extends JPanel {
     private void deleteEquipment() {
         int selectedRow = equipmentTable.getSelectedRow();
         if (selectedRow != -1) {
-            int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the selected equipment item?", "Confirmation", JOptionPane.YES_NO_OPTION);
-            if (confirmation == JOptionPane.YES_OPTION) {
-                equipmentTableModel.removeRow(selectedRow);
-            }
+            equipmentTableModel.removeRow(selectedRow);
         } else {
             JOptionPane.showMessageDialog(this, "Please select an equipment item to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -319,7 +280,7 @@ public class MainView extends JPanel {
 
     private void saveEquipmentList() {
         String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
-        String companyId = (String) companyTableModel.getValueAt(0, 0);
+        String companyId = (String) companyTableModel.getValueAt(companyTable.getSelectedRow(), 0);
         List<Task.Equipment> equipmentList = getEquipmentListFromTable();
         taskController.updateEquipmentList(collectionName, companyId, equipmentList);
         JOptionPane.showMessageDialog(this, "Equipment list saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);

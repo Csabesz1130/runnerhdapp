@@ -96,6 +96,10 @@ public class Task {
         this.equipmentList = equipmentList;
     }
 
+    public String getCompanyName() {
+        return name;
+    }
+
     public static class Equipment {
         private String snDid;
         private String type;
