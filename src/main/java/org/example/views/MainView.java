@@ -19,6 +19,7 @@ public class MainView extends JPanel {
     private final AuthController authController;
     private final MainFrame mainFrame;
     private final TaskController taskController;
+
     private JComboBox<String> festivalComboBox;
     private JRadioButton installationRadioButton;
     private JRadioButton demolitionRadioButton;
@@ -31,6 +32,7 @@ public class MainView extends JPanel {
     private JButton editButton;
     private JButton deleteButton;
     private JButton saveButton;
+    private JButton logoutButton;
 
     public MainView(AuthController authController, MainFrame mainFrame, TaskController taskController) {
         this.authController = authController;
@@ -41,7 +43,7 @@ public class MainView extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel topPanel = new JPanel(new GridBagLayout());
@@ -57,16 +59,34 @@ public class MainView extends JPanel {
         gbc.gridx = 1;
         gbc.gridy = 0;
         festivalComboBox = new JComboBox<>();
+        festivalComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fetchCompanies();
+            }
+        });
         topPanel.add(festivalComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         installationRadioButton = new JRadioButton("Installation");
+        installationRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fetchCompanies();
+            }
+        });
         topPanel.add(installationRadioButton, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         demolitionRadioButton = new JRadioButton("Demolition");
+        demolitionRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fetchCompanies();
+            }
+        });
         topPanel.add(demolitionRadioButton, gbc);
 
         ButtonGroup choiceButtonGroup = new ButtonGroup();
@@ -75,6 +95,7 @@ public class MainView extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.gridwidth = 2;
         fetchCompaniesButton = new JButton("Fetch Companies");
         fetchCompaniesButton.addActionListener(new ActionListener() {
             @Override
@@ -145,7 +166,7 @@ public class MainView extends JPanel {
 
         add(tabbedPane, BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
             @Override
@@ -153,7 +174,16 @@ public class MainView extends JPanel {
                 saveEquipmentList();
             }
         });
-        bottomPanel.add(saveButton);
+        bottomPanel.add(saveButton, BorderLayout.WEST);
+
+        logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logout();
+            }
+        });
+        bottomPanel.add(logoutButton, BorderLayout.EAST);
 
         add(bottomPanel, BorderLayout.SOUTH);
     }
@@ -164,22 +194,26 @@ public class MainView extends JPanel {
         for (String festival : festivals) {
             festivalComboBox.addItem(festival);
         }
-    }
-
-    public void setTasks(List<Task> tasks) {
-        companyTableModel.setRowCount(0);
-
-        for (Task task : tasks) {
-            Object[] rowData = {task.getId(), task.getCompanyName()};
-            companyTableModel.addRow(rowData);
+        if (!festivals.isEmpty()) {
+            fetchCompanies();
         }
     }
 
     private void fetchCompanies() {
         String selectedFestival = (String) festivalComboBox.getSelectedItem();
-        String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
+        boolean isInstallation = installationRadioButton.isSelected();
+        String collectionName = isInstallation ? "Company_Install" : "Company_Demolition";
         List<Task> companies = taskController.getCompaniesByFestival(collectionName, selectedFestival);
         setTasks(companies);
+    }
+
+
+    private void setTasks(List<Task> tasks) {
+        companyTableModel.setRowCount(0);
+        for (Task task : tasks) {
+            Object[] rowData = {task.getId(), task.getName()};
+            companyTableModel.addRow(rowData);
+        }
     }
 
     private void loadEquipmentList(String companyId) {
@@ -280,10 +314,15 @@ public class MainView extends JPanel {
 
     private void saveEquipmentList() {
         String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
-        String companyId = (String) companyTableModel.getValueAt(companyTable.getSelectedRow(), 0);
-        List<Task.Equipment> equipmentList = getEquipmentListFromTable();
-        taskController.updateEquipmentList(collectionName, companyId, equipmentList);
-        JOptionPane.showMessageDialog(this, "Equipment list saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        int selectedCompanyRow = companyTable.getSelectedRow();
+        if (selectedCompanyRow != -1) {
+            String companyId = (String) companyTableModel.getValueAt(selectedCompanyRow, 0);
+            List<Task.Equipment> equipmentList = getEquipmentListFromTable();
+            taskController.updateEquipmentList(collectionName, companyId, equipmentList);
+            JOptionPane.showMessageDialog(this, "Equipment list saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a company to save the equipment list.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private List<Task.Equipment> getEquipmentListFromTable() {
@@ -297,6 +336,11 @@ public class MainView extends JPanel {
             equipmentList.add(equipment);
         }
         return equipmentList;
+    }
+
+    private void logout() {
+        authController.logout();
+        mainFrame.showLoginView();
     }
 
     public void clearTasks() {

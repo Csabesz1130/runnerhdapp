@@ -1,13 +1,10 @@
 package org.example.controllers;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
+import com.google.cloud.firestore.Firestore;
 import org.example.models.Task;
 import org.example.services.FirestoreService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class TaskController {
     private final FirestoreService firestoreService;
@@ -56,24 +53,6 @@ public class TaskController {
     }
 
     public List<Task> getCompaniesByFestival(String collectionName, String selectedFestival) {
-        List<Task> companies = new ArrayList<>();
-        if (db != null) {
-            CollectionReference companiesCollection = db.collection(collectionName);
-            Query query = companiesCollection.whereEqualTo("programName", selectedFestival);
-            ApiFuture<QuerySnapshot> future = query.get();
-            try {
-                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-                for (QueryDocumentSnapshot document : documents) {
-                    Task company = document.toObject(Task.class);
-                    companies.add(company);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                System.err.println("Failed to retrieve companies: " + e.getMessage());
-            }
-        } else {
-            System.err.println("Firestore is not initialized. Cannot retrieve companies.");
-        }
-        return companies;
+        return firestoreService.getCompaniesByFestival(collectionName, selectedFestival);
     }
 }
