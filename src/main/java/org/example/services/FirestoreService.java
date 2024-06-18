@@ -34,8 +34,10 @@ public class FirestoreService {
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();
                 FirebaseApp.initializeApp(options);
+                System.out.println("FirebaseApp initialized successfully.");
             }
             db = FirestoreClient.getFirestore();
+            System.out.println("Firestore initialized successfully.");
         } catch (IOException e) {
             System.err.println("Error initializing Firestore: " + e.getMessage());
         }
@@ -233,12 +235,12 @@ public class FirestoreService {
         List<String> suggestions = new ArrayList<>();
         CollectionReference companiesCollection = db.collection("Company_Install");
         try {
-            Query query = companiesCollection.whereGreaterThanOrEqualTo("id", searchText)
-                    .whereLessThanOrEqualTo("id", searchText + "\uf8ff")
+            Query query = companiesCollection.whereGreaterThanOrEqualTo("Id", searchText)
+                    .whereLessThanOrEqualTo("Id", searchText + "\uf8ff")
                     .limit(5);
             QuerySnapshot querySnapshot = query.get().get();
             for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
-                String companyId = document.getString("id");
+                String companyId = document.getString("Id");
                 suggestions.add(companyId);
             }
         } catch (Exception e) {
@@ -251,7 +253,7 @@ public class FirestoreService {
         List<Task> companies = new ArrayList<>();
         if (db != null) {
             CollectionReference companiesCollection = db.collection(collectionName);
-            Query query = companiesCollection.whereEqualTo("programName", festivalName);
+            Query query = companiesCollection.whereEqualTo("ProgramName", festivalName);
             ApiFuture<QuerySnapshot> future = query.get();
             try {
                 List<QueryDocumentSnapshot> documents = future.get().getDocuments();
