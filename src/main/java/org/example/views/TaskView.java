@@ -28,7 +28,7 @@ public class TaskView extends JPanel {
         setLayout(new BorderLayout());
 
         JPanel infoPanel = new JPanel(new GridLayout(3, 2));
-        telephelyLabel = new JLabel("Telephely: " + task.getTelephelyKod());
+        telephelyLabel = new JLabel("Telephely: " + task.getCompanyName());
         statuszLabel = new JLabel("Státusz:");
         statuszComboBox = new JComboBox<>(new String[]{"Felderítés", "Telepíthető", "Kirakható", "Nem rakható ki"});
         megjegyzesTextArea = new JTextArea(5, 20);
@@ -49,7 +49,7 @@ public class TaskView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String ujStatusz = (String) statuszComboBox.getSelectedItem();
                 String megjegyzes = megjegyzesTextArea.getText();
-                taskController.frissitFeladat(task, ujStatusz, megjegyzes);
+                taskController.updateTask(task, ujStatusz, megjegyzes);
             }
         });
     }

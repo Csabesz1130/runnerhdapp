@@ -9,6 +9,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.cloud.FirestoreClient;
+
 public class LoginView extends JPanel {
 
     public static final String[] FELHASZNÁLÓNEVEK = {"borisz", "trisztanv", "davidartur"};
@@ -21,7 +24,11 @@ public class LoginView extends JPanel {
     private JButton bejelentkezésButton;
 
     public LoginView(MainFrame mainFrame) {
-        FirestoreService firestoreService = new FirestoreService();
+        // Initialize Firestore
+        Firestore firestore = FirestoreClient.getFirestore();
+
+        // Pass the Firestore instance to FirestoreService
+        FirestoreService firestoreService = new FirestoreService(firestore);
         this.authController = new AuthController(firestoreService, FELHASZNÁLÓNEVEK, JELSZÓ);
 
         felhasználónévComboBox = new JComboBox<>(FELHASZNÁLÓNEVEK);  // Initialize JComboBox

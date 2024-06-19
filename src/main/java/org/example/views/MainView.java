@@ -207,11 +207,10 @@ public class MainView extends JPanel {
         setTasks(companies);
     }
 
-
     public void setTasks(List<Task> tasks) {
         companyTableModel.setRowCount(0);
         for (Task task : tasks) {
-            Object[] rowData = {task.getId(), task.getName()};
+            Object[] rowData = {task.getId(), task.getCompanyName()};
             companyTableModel.addRow(rowData);
         }
     }

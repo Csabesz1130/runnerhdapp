@@ -1,65 +1,77 @@
 package org.example.services;
 
 import com.google.api.core.ApiFuture;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.cloud.FirestoreClient;
 import org.example.models.Task;
+import org.example.models.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class FirestoreService {
-    private Firestore db;
-    private String loggedInUser;
+    private static final Logger logger = LoggerFactory.getLogger(FirestoreService.class);
+    private final Firestore db;
+    private User loggedInUser;
 
-    public FirestoreService() {
-        initializeFirestore();
+    public FirestoreService(Firestore db) {
+        this.db = db;
     }
 
-    public Firestore getFirestore() {
-        return db;
+    public boolean isInitialized() {
+        return db != null;
     }
 
-    private void initializeFirestore() {
-        try {
-            if (FirebaseApp.getApps().isEmpty()) {
-                FileInputStream serviceAccount = new FileInputStream("src/main/resources/runnerapp-232cc-firebase-adminsdk-2csiq-a0feb0a3ba.json");
-                FirebaseOptions options = new FirebaseOptions.Builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
-                FirebaseApp.initializeApp(options);
-                System.out.println("FirebaseApp initialized successfully.");
+    public boolean login(String username, String password) {
+        if (db != null) {
+            CollectionReference usersCollection = db.collection("Users");
+            Query query = usersCollection.whereEqualTo("username", username).whereEqualTo("password", password);
+            ApiFuture<QuerySnapshot> future = query.get();
+            try {
+                QuerySnapshot snapshot = future.get();
+                if (!snapshot.isEmpty()) {
+                    loggedInUser = snapshot.getDocuments().get(0).toObject(User.class);
+                    return true;
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error("Failed to login user: {}", e.getMessage());
             }
-            db = FirestoreClient.getFirestore();
-            System.out.println("Firestore initialized successfully.");
-        } catch (IOException e) {
-            System.err.println("Error initializing Firestore: " + e.getMessage());
+        } else {
+            logger.error("Firestore is not initialized. Cannot login user.");
         }
+        return false;
+    }
+
+    public boolean isLoggedIn() {
+        return loggedInUser != null;
+    }
+
+    public String getLoggedInUser() {
+        if (loggedInUser != null) {
+            return loggedInUser.getUsername();
+        }
+        return null;
+    }
+
+    public void logout() {
+        loggedInUser = null;
     }
 
     public void addTask(String collection, Task task) {
         if (db != null) {
-            CollectionReference tasksCollection = db.collection(collection);
-            tasksCollection.add(task);
-            System.out.println("Task added successfully.");
+            db.collection(collection).add(task).addListener(() -> logger.info("Task added successfully."), Runnable::run);
         } else {
-            System.err.println("Firestore is not initialized. Cannot add task.");
+            logger.error("Firestore is not initialized. Cannot add task.");
         }
     }
 
     public void updateTask(String collection, String id, Task task) {
         if (db != null) {
-            DocumentReference taskDocument = db.collection(collection).document(id);
-            taskDocument.set(task);
-            System.out.println("Task updated successfully.");
+            db.collection(collection).document(id).set(task).addListener(() -> logger.info("Task updated successfully."), Runnable::run);
         } else {
-            System.err.println("Firestore is not initialized. Cannot update task.");
+            logger.error("Firestore is not initialized. Cannot update task.");
         }
     }
 
@@ -75,178 +87,31 @@ public class FirestoreService {
                     tasks.add(task);
                 }
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                System.err.println("Failed to retrieve tasks: " + e.getMessage());
+                logger.error("Failed to retrieve tasks: {}", e.getMessage());
             }
         } else {
-            System.err.println("Firestore is not initialized. Cannot retrieve tasks.");
+            logger.error("Firestore is not initialized. Cannot retrieve tasks.");
         }
         return tasks;
     }
 
-    public void deleteTask(String collection, String id) {
-        if (db != null) {
-            DocumentReference taskDocument = db.collection(collection).document(id);
-            taskDocument.delete();
-            System.out.println("Task deleted successfully.");
-        } else {
-            System.err.println("Firestore is not initialized. Cannot delete task.");
-        }
-    }
-
-    public void registerUser(String username, String password) {
-        if (db != null) {
-            CollectionReference users = db.collection("users");
-            DocumentReference newUser = users.document(username);
-            try {
-                newUser.set(new User(username, password, false));
-                System.out.println("User registered successfully.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Failed to register user: " + e.getMessage());
-            }
-        } else {
-            System.err.println("Firestore is not initialized. Cannot register user.");
-        }
-    }
-
-    public boolean authenticateUser(String username, String password) {
-        if (db != null) {
-            CollectionReference users = db.collection("users");
-            try {
-                QuerySnapshot snapshot = users.whereEqualTo("username", username)
-                        .whereEqualTo("password", password)
-                        .get().get();
-                return !snapshot.isEmpty();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                System.err.println("Failed to authenticate user: " + e.getMessage());
-                return false;
-            }
-        } else {
-            System.err.println("Firestore is not initialized. Cannot authenticate user.");
-            return false;
-        }
-    }
-
-    public void login(String username) {
-        if (db != null) {
-            try {
-                db.collection("users").document(username).update("loggedIn", true);
-                loggedInUser = username;
-                System.out.println("User logged in successfully.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Failed to log in user: " + e.getMessage());
-            }
-        } else {
-            System.err.println("Firestore is not initialized. Cannot log in user.");
-        }
-    }
-
-    public boolean isLoggedIn() {
-        return loggedInUser != null;
-    }
-
-    public String getLoggedInUser() {
-        return loggedInUser;
-    }
-
-    public void logout() {
-        if (loggedInUser != null && db != null) {
-            try {
-                db.collection("users").document(loggedInUser).update("loggedIn", false);
-                loggedInUser = null;
-                System.out.println("User logged out successfully.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Failed to log out user: " + e.getMessage());
-            }
-        } else {
-            System.err.println("Firestore is not initialized or no user is logged in. Cannot log out user.");
-        }
-    }
-
-    public boolean isInitialized() {
-        return db != null;
-    }
-
     public List<String> getFestivals() {
         List<String> festivals = new ArrayList<>();
-        CollectionReference programsCollection = db.collection("Programs");
-        try {
-            QuerySnapshot querySnapshot = programsCollection.get().get();
-            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
-                String festivalName = document.getString("name");
-                festivals.add(festivalName);
+        if (db != null) {
+            CollectionReference programsCollection = db.collection("Programs");
+            try {
+                QuerySnapshot querySnapshot = programsCollection.get().get();
+                for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
+                    String festivalName = document.getString("ProgramName");
+                    festivals.add(festivalName);
+                }
+            } catch (Exception e) {
+                logger.error("Error retrieving festivals: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error retrieving festivals: " + e.getMessage());
+        } else {
+            logger.error("Firestore is not initialized. Cannot retrieve festivals.");
         }
         return festivals;
-    }
-
-    public Task getCompanyById(String collectionName, String companyId) {
-        DocumentReference companyDocument = db.collection(collectionName).document(companyId);
-        try {
-            DocumentSnapshot documentSnapshot = companyDocument.get().get();
-            if (documentSnapshot.exists()) {
-                return documentSnapshot.toObject(Task.class);
-            }
-        } catch (Exception e) {
-            System.err.println("Error retrieving company: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public void createCompany(String collectionName, Task company) {
-        CollectionReference companiesCollection = db.collection(collectionName);
-        companiesCollection.document(company.getId()).set(company);
-    }
-
-    public List<Task.Equipment> getEquipmentList(String collectionName, String companyId) {
-        List<Task.Equipment> equipmentList = new ArrayList<>();
-        DocumentReference companyDocument = db.collection(collectionName).document(companyId);
-        try {
-            DocumentSnapshot documentSnapshot = companyDocument.get().get();
-            if (documentSnapshot.exists()) {
-                Task company = documentSnapshot.toObject(Task.class);
-                if (company != null) {
-                    equipmentList = company.getEquipmentList();
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error retrieving equipment list: " + e.getMessage());
-        }
-        return equipmentList;
-    }
-
-    public void updateEquipmentList(String collectionName, String companyId, List<Task.Equipment> equipmentList) {
-        DocumentReference companyDocument = db.collection(collectionName).document(companyId);
-        try {
-            companyDocument.update("equipmentList", equipmentList);
-            System.out.println("Equipment list updated successfully.");
-        } catch (Exception e) {
-            System.err.println("Error updating equipment list: " + e.getMessage());
-        }
-    }
-
-    public List<String> getCompanySuggestions(String searchText) {
-        List<String> suggestions = new ArrayList<>();
-        CollectionReference companiesCollection = db.collection("Company_Install");
-        try {
-            Query query = companiesCollection.whereGreaterThanOrEqualTo("Id", searchText)
-                    .whereLessThanOrEqualTo("Id", searchText + "\uf8ff")
-                    .limit(5);
-            QuerySnapshot querySnapshot = query.get().get();
-            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
-                String companyId = document.getString("Id");
-                suggestions.add(companyId);
-            }
-        } catch (Exception e) {
-            System.err.println("Error retrieving company suggestions: " + e.getMessage());
-        }
-        return suggestions;
     }
 
     public List<Task> getCompaniesByFestival(String collectionName, String festivalName) {
@@ -262,24 +127,66 @@ public class FirestoreService {
                     companies.add(company);
                 }
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                System.err.println("Failed to retrieve companies: " + e.getMessage());
+                logger.error("Failed to retrieve companies: {}", e.getMessage());
             }
         } else {
-            System.err.println("Firestore is not initialized. Cannot retrieve companies.");
+            logger.error("Firestore is not initialized. Cannot retrieve companies.");
         }
         return companies;
     }
 
-    static class User {
-        String username;
-        String password;
-        boolean loggedIn;
+    public Task getCompanyById(String collectionName, String companyId) {
+        if (db != null) {
+            DocumentReference companyDocument = db.collection(collectionName).document(companyId);
+            try {
+                DocumentSnapshot documentSnapshot = companyDocument.get().get();
+                if (documentSnapshot.exists()) {
+                    return documentSnapshot.toObject(Task.class);
+                }
+            } catch (Exception e) {
+                logger.error("Error retrieving company: {}", e.getMessage());
+            }
+        } else {
+            logger.error("Firestore is not initialized. Cannot retrieve company.");
+        }
+        return null;
+    }
 
-        User(String username, String password, boolean loggedIn) {
-            this.username = username;
-            this.password = password;
-            this.loggedIn = loggedIn;
+    public void createCompany(String collectionName, Task company) {
+        if (db != null) {
+            db.collection(collectionName).document(company.getId()).set(company).addListener(() -> logger.info("Company created successfully."), Runnable::run);
+        } else {
+            logger.error("Firestore is not initialized. Cannot create company.");
+        }
+    }
+
+    public List<Task.Equipment> getEquipmentList(String collectionName, String companyId) {
+        List<Task.Equipment> equipmentList = new ArrayList<>();
+        if (db != null) {
+            DocumentReference companyDocument = db.collection(collectionName).document(companyId);
+            try {
+                DocumentSnapshot documentSnapshot = companyDocument.get().get();
+                if (documentSnapshot.exists()) {
+                    Task company = documentSnapshot.toObject(Task.class);
+                    if (company != null) {
+                        equipmentList = company.getEquipmentList();
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error retrieving equipment list: {}", e.getMessage());
+            }
+        } else {
+            logger.error("Firestore is not initialized. Cannot retrieve equipment list.");
+        }
+        return equipmentList;
+    }
+
+    public void updateEquipmentList(String collectionName, String companyId, List<Task.Equipment> equipmentList) {
+        if (db != null) {
+            db.collection(collectionName).document(companyId).update("equipmentList", equipmentList)
+                    .addListener(() -> logger.info("Equipment list updated successfully."), Runnable::run);
+        } else {
+            logger.error("Firestore is not initialized. Cannot update equipment list.");
         }
     }
 }

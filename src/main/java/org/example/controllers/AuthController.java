@@ -24,7 +24,7 @@ public class AuthController {
             // Check if the provided username and password are valid
             if (isValidCredentials(felhasználónév, jelszó)) {
                 // Perform login logic using FirestoreService
-                firestoreService.login(felhasználónév);
+                firestoreService.login(felhasználónév, jelszó);
                 return true;
             }
         } else {

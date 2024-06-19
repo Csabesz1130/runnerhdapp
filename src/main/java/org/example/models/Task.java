@@ -4,30 +4,30 @@ import java.util.List;
 
 public class Task {
     private String id;
-    private String name;
-    private String description;
-    private String telephelyKod;
-    private String telephelyNev;
-    private String statusz;
-    private String megjegyzes;
+    private String companyName;
+    private String lastModified;
+    private String programName;
+    private boolean megNyitva;
+    private boolean statuszNelkul;
     private List<Equipment> equipmentList;
 
     // Constructors
-    public Task() {}
-
-    public Task(String id, String name) {
-        this.id = id;
-        this.name = name;
+    public Task() {
     }
 
-    public Task(String id, String name, String description, String telephelyKod, String telephelyNev, String statusz, String megjegyzes, List<Equipment> equipmentList) {
+    public Task(String id, String companyName) {
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.telephelyKod = telephelyKod;
-        this.telephelyNev = telephelyNev;
-        this.statusz = statusz;
-        this.megjegyzes = megjegyzes;
+        this.companyName = companyName;
+    }
+
+    public Task(String id, String companyName, String lastModified, String programName,
+                boolean megNyitva, boolean statuszNelkul, List<Equipment> equipmentList) {
+        this.id = id;
+        this.companyName = companyName;
+        this.lastModified = lastModified;
+        this.programName = programName;
+        this.megNyitva = megNyitva;
+        this.statuszNelkul = statuszNelkul;
         this.equipmentList = equipmentList;
     }
 
@@ -40,52 +40,44 @@ public class Task {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
-    public String getDescription() {
-        return description;
+    public String getLastModified() {
+        return lastModified;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setLastModified(String lastModified) {
+        this.lastModified = lastModified;
     }
 
-    public String getTelephelyKod() {
-        return telephelyKod;
+    public String getProgramName() {
+        return programName;
     }
 
-    public void setTelephelyKod(String telephelyKod) {
-        this.telephelyKod = telephelyKod;
+    public void setProgramName(String programName) {
+        this.programName = programName;
     }
 
-    public String getTelephelyNev() {
-        return telephelyNev;
+    public boolean isMegNyitva() {
+        return megNyitva;
     }
 
-    public void setTelephelyNev(String telephelyNev) {
-        this.telephelyNev = telephelyNev;
+    public void setMegNyitva(boolean megNyitva) {
+        this.megNyitva = megNyitva;
     }
 
-    public String getStatusz() {
-        return statusz;
+    public boolean isStatuszNelkul() {
+        return statuszNelkul;
     }
 
-    public void setStatusz(String statusz) {
-        this.statusz = statusz;
-    }
-
-    public String getMegjegyzes() {
-        return megjegyzes;
-    }
-
-    public void setMegjegyzes(String megjegyzes) {
-        this.megjegyzes = megjegyzes;
+    public void setStatuszNelkul(boolean statuszNelkul) {
+        this.statuszNelkul = statuszNelkul;
     }
 
     public List<Equipment> getEquipmentList() {
@@ -94,10 +86,6 @@ public class Task {
 
     public void setEquipmentList(List<Equipment> equipmentList) {
         this.equipmentList = equipmentList;
-    }
-
-    public String getCompanyName() {
-        return name;
     }
 
     public static class Equipment {

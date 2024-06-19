@@ -1,12 +1,19 @@
 package org.example;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.cloud.FirestoreClient;
 import org.example.controllers.*;
 import org.example.models.Task;
-import org.example.views.*;
 import org.example.services.FirestoreService;
+import org.example.views.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class MainFrame extends JFrame {
@@ -25,11 +32,26 @@ public class MainFrame extends JFrame {
     private JPanel mainPanel;
 
     public MainFrame() {
-        FirestoreService firestoreService = new FirestoreService();
+        Firestore db = initializeFirestore();
+        FirestoreService firestoreService = new FirestoreService(db);
         this.authController = new AuthController(firestoreService, LoginView.FELHASZNÁLÓNEVEK, LoginView.JELSZÓ);
         this.taskController = new TaskController(firestoreService);
 
         initUI();
+    }
+
+    private Firestore initializeFirestore() {
+        try {
+            FileInputStream serviceAccount = new FileInputStream("src/main/resources/runnerapp-232cc-firebase-adminsdk-2csiq-a0feb0a3ba.json");
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+            FirebaseApp.initializeApp(options);
+            return FirestoreClient.getFirestore();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void initUI() {
@@ -44,7 +66,6 @@ public class MainFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Create and add views
         mainPanel.add(loginView, "Login");
         mainPanel.add(mainView, "MainView");
         mainPanel.add(new DashboardView(dashboardController), "Dashboard");
