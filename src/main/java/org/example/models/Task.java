@@ -1,35 +1,19 @@
 package org.example.models;
 
+import com.google.cloud.firestore.annotation.PropertyName;
 import java.util.List;
+import com.google.cloud.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class Task {
     private String id;
-    private String companyName;
-    private String lastModified;
     private String programName;
-    private boolean megNyitva;
-    private boolean statuszNelkul;
+    private String lastModified;
+    private String companyName;
     private List<Equipment> equipmentList;
-
-    // Constructors
-    public Task() {
-    }
-
-    public Task(String id, String companyName) {
-        this.id = id;
-        this.companyName = companyName;
-    }
-
-    public Task(String id, String companyName, String lastModified, String programName,
-                boolean megNyitva, boolean statuszNelkul, List<Equipment> equipmentList) {
-        this.id = id;
-        this.companyName = companyName;
-        this.lastModified = lastModified;
-        this.programName = programName;
-        this.megNyitva = megNyitva;
-        this.statuszNelkul = statuszNelkul;
-        this.equipmentList = equipmentList;
-    }
+    private Map<String, Object> dynamicFields;
 
     // Getters and Setters
     public String getId() {
@@ -40,44 +24,34 @@ public class Task {
         this.id = id;
     }
 
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(String lastModified) {
-        this.lastModified = lastModified;
-    }
-
+    @PropertyName("ProgramName")
     public String getProgramName() {
         return programName;
     }
 
+    @PropertyName("ProgramName")
     public void setProgramName(String programName) {
         this.programName = programName;
     }
 
-    public boolean isMegNyitva() {
-        return megNyitva;
+    @PropertyName("LastModified")
+    public String getLastModified() {
+        return lastModified;
     }
 
-    public void setMegNyitva(boolean megNyitva) {
-        this.megNyitva = megNyitva;
+    @PropertyName("LastModified")
+    public void setLastModified(String lastModified) {
+        this.lastModified = lastModified;
     }
 
-    public boolean isStatuszNelkul() {
-        return statuszNelkul;
+    @PropertyName("CompanyName")
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setStatuszNelkul(boolean statuszNelkul) {
-        this.statuszNelkul = statuszNelkul;
+    @PropertyName("CompanyName")
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public List<Equipment> getEquipmentList() {
@@ -88,7 +62,25 @@ public class Task {
         this.equipmentList = equipmentList;
     }
 
+    public Map<String, Object> getDynamicFields() {
+        return dynamicFields;
+    }
+
+    public void setDynamicFields(Map<String, Object> dynamicFields) {
+        this.dynamicFields = dynamicFields;
+    }
+
+    public void addDynamicField(String key, Object value) {
+        this.dynamicFields.put(key, value);
+    }
+
+    public Object getDynamicField(String key) {
+        return this.dynamicFields.get(key);
+    }
+
+    // Inner class for Equipment
     public static class Equipment {
+        private Map<String, Object> dynamicFields;
         private String snDid;
         private String type;
         private String model;
@@ -101,20 +93,20 @@ public class Task {
             this.status = status;
         }
 
-        public String getSnDid() {
-            return snDid;
+        public Map<String, Object> getDynamicFields() {
+            return dynamicFields;
         }
 
-        public String getType() {
-            return type;
+        public void setDynamicFields(Map<String, Object> dynamicFields) {
+            this.dynamicFields = dynamicFields;
         }
 
-        public String getModel() {
-            return model;
+        public void addDynamicField(String key, Object value) {
+            this.dynamicFields.put(key, value);
         }
 
-        public String getStatus() {
-            return status;
+        public Object getDynamicField(String key) {
+            return this.dynamicFields.get(key);
         }
     }
 }

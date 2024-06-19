@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.table.TableColumnModel;
+import java.util.Map;
 
 public class MainView extends JPanel {
     private final AuthController authController;
@@ -199,12 +201,50 @@ public class MainView extends JPanel {
         }
     }
 
+    private void loadEquipmentList(String companyId) {
+        String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
+        List<Task.Equipment> equipmentList = taskController.getEquipmentList(collectionName, companyId);
+        equipmentTableModel.setRowCount(0);
+
+        // Clear existing columns
+        while (equipmentTable.getColumnCount() > 0) {
+            TableColumnModel columnModel = equipmentTable.getColumnModel();
+            columnModel.removeColumn(columnModel.getColumn(0));
+        }
+
+        // Add columns based on the first equipment item's dynamic fields
+        if (!equipmentList.isEmpty()) {
+            Task.Equipment firstEquipment = equipmentList.get(0);
+            for (String key : firstEquipment.getDynamicFields().keySet()) {
+                equipmentTableModel.addColumn(key);
+            }
+        }
+
+        // Populate the table with the corresponding field values
+        for (Task.Equipment equipment : equipmentList) {
+            Object[] rowData = new Object[equipment.getDynamicFields().size()];
+            int i = 0;
+            for (Object value : equipment.getDynamicFields().values()) {
+                rowData[i++] = value;
+            }
+            equipmentTableModel.addRow(rowData);
+        }
+    }
+
     private void fetchCompanies() {
         String selectedFestival = (String) festivalComboBox.getSelectedItem();
         boolean isInstallation = installationRadioButton.isSelected();
         String collectionName = isInstallation ? "Company_Install" : "Company_Demolition";
         List<Task> companies = taskController.getCompaniesByFestival(collectionName, selectedFestival);
-        setTasks(companies);
+        setCompanies(companies);
+    }
+
+    private void setCompanies(List<Task> companies) {
+        companyTableModel.setRowCount(0);
+        for (Task company : companies) {
+            Object[] rowData = {company.getId(), company.getCompanyName(), company.getLastModified()};
+            companyTableModel.addRow(rowData);
+        }
     }
 
     public void setTasks(List<Task> tasks) {
@@ -212,16 +252,6 @@ public class MainView extends JPanel {
         for (Task task : tasks) {
             Object[] rowData = {task.getId(), task.getCompanyName()};
             companyTableModel.addRow(rowData);
-        }
-    }
-
-    private void loadEquipmentList(String companyId) {
-        String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
-        List<Task.Equipment> equipmentList = taskController.getEquipmentList(collectionName, companyId);
-        equipmentTableModel.setRowCount(0);
-        for (Task.Equipment equipment : equipmentList) {
-            Object[] rowData = {equipment.getSnDid(), equipment.getType(), equipment.getModel(), equipment.getStatus()};
-            equipmentTableModel.addRow(rowData);
         }
     }
 
