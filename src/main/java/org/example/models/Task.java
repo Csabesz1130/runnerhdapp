@@ -10,7 +10,7 @@ import java.util.Map;
 public class Task {
     private String id;
     private String programName;
-    private String lastModified;
+    private Timestamp lastModified;
     private String companyName;
     private List<Equipment> equipmentList;
     private Map<String, Object> dynamicFields;
@@ -35,12 +35,12 @@ public class Task {
     }
 
     @PropertyName("LastModified")
-    public String getLastModified() {
+    public Timestamp getLastModified() {
         return lastModified;
     }
 
     @PropertyName("LastModified")
-    public void setLastModified(String lastModified) {
+    public void setLastModified(Timestamp lastModified) {
         this.lastModified = lastModified;
     }
 

@@ -117,6 +117,7 @@ public class FirestoreService {
     public List<Task> getCompaniesByFestival(String collectionName, String festivalName) {
         List<Task> companies = new ArrayList<>();
         if (db != null) {
+            //collectionName = "Company_Install";
             CollectionReference companiesCollection = db.collection(collectionName);
             Query query = companiesCollection.whereEqualTo("ProgramName", festivalName);
             ApiFuture<QuerySnapshot> future = query.get();
