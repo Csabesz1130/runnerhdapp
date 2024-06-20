@@ -10,6 +10,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 public class MainView extends JPanel {
@@ -114,6 +116,10 @@ public class MainView extends JPanel {
         }
     }
 
+    public String getSelectedCollectionName() {
+        return installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
+    }
+
     public void setTasks(List<Task> companies) {
         companyTableModel.setRowCount(0);
         for (Task company : companies) {
@@ -121,7 +127,6 @@ public class MainView extends JPanel {
             companyTableModel.addRow(rowData);
         }
     }
-
 
     private void fetchCompanies() {
         String selectedFestival = (String) festivalComboBox.getSelectedItem();

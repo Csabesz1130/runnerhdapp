@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5867d798-fce9-4533-80d1-43d4907a397c" name="Changes" comment="1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/services/FirestoreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/services/FirestoreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/models/Task.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/models/Task.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/views/MainView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/views/MainView.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,27 +58,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RunnerHDApp [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RunnerHDApp [:MainFrame.main()].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.RunnerHDApp [dependencies].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RunnerHDApp.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Balogh Csaba/RunnerHDApp/src/main/resources&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Profiler#1",
+    "Gradle.Build RunnerHDApp.executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.RunnerHDApp [:Main.main()].executor": "Debug",
+    "Gradle.RunnerHDApp [:MainFrame.main()].executor": "Run",
+    "Gradle.RunnerHDApp [dependencies].executor": "Run",
+    "Gradle.RunnerHDApp.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Balogh Csaba/RunnerHDApp/src/main/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Balogh Csaba\RunnerHDApp\src\main\resources" />
@@ -97,6 +99,28 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration name="RunnerHDApp [:Main.main()]" type="GradleRunConfiguration" factoryName="Gradle">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":Main.main()" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
     </configuration>
     <configuration name="RunnerHDApp [dependencies]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -143,8 +167,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
-        <item itemvalue="Gradle.RunnerHDApp" />
         <item itemvalue="Gradle.RunnerHDApp [dependencies]" />
+        <item itemvalue="Gradle.RunnerHDApp" />
       </list>
     </recent_temporary>
   </component>
@@ -170,7 +194,10 @@
       <workItem from="1718018201298" duration="3692000" />
       <workItem from="1718127610628" duration="32304000" />
       <workItem from="1718571694459" duration="22000" />
-      <workItem from="1718644452495" duration="34998000" />
+      <workItem from="1718644452495" duration="41106000" />
+      <workItem from="1718842222529" duration="1857000" />
+      <workItem from="1718844450466" duration="1035000" />
+      <workItem from="1718845896855" duration="368000" />
     </task>
     <task id="LOCAL-00001" summary="1">
       <option name="closed" value="true" />
@@ -428,11 +455,30 @@
       <option name="project" value="LOCAL" />
       <updated>1718809742418</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="1">
+      <option name="closed" value="true" />
+      <created>1718826040356</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1718826040356</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="1" />

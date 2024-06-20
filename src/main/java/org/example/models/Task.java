@@ -15,6 +15,10 @@ public class Task {
     private List<Equipment> equipmentList;
     private Map<String, Object> dynamicFields;
 
+    public Task() {
+        this.dynamicFields = new HashMap<>();
+    }
+
     // Getters and Setters
     public String getId() {
         return id;
@@ -86,10 +90,47 @@ public class Task {
         private String model;
         private String status;
 
+        public Equipment() {
+            this.dynamicFields = new HashMap<>();
+        }
+
         public Equipment(String snDid, String type, String model, String status) {
+            this();
             this.snDid = snDid;
             this.type = type;
             this.model = model;
+            this.status = status;
+        }
+
+        public String getSnDid() {
+            return snDid;
+        }
+
+        public void setSnDid(String snDid) {
+            this.snDid = snDid;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
+        public void setModel(String model) {
+            this.model = model;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
             this.status = status;
         }
 
