@@ -1,6 +1,7 @@
 package org.example.controllers;
 
 import org.example.services.FirestoreService;
+import java.util.concurrent.CompletableFuture;
 
 public class AuthController {
     private FirestoreService firestoreService;
@@ -19,13 +20,28 @@ public class AuthController {
         this.jelszó = jelszó;
     }
 
-    public boolean login(String felhasználónév, String jelszó) {
+    public CompletableFuture<Boolean> login(String felhasználónév, String jelszó) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+
         if (firestoreService != null && firestoreService.isInitialized()) {
             // Check if the provided username and password are valid
             if (isValidCredentials(felhasználónév, jelszó)) {
                 // Perform login logic using FirestoreService
-                firestoreService.login(felhasználónév, jelszó);
-                return true;
+                firestoreService.login(felhasználónév, jelszó,
+                        success -> {
+                            if (success) {
+                                future.complete(true);
+                            } else {
+                                future.complete(false);
+                            }
+                        },
+                        error -> {
+                            System.err.println("Login error: " + error.getMessage());
+                            future.completeExceptionally(error);
+                        }
+                );
+            } else {
+                future.complete(false);
             }
         } else {
             System.out.println("FirestoreService is not initialized. AuthController will work without Firestore.");
@@ -33,25 +49,27 @@ public class AuthController {
             if (isValidCredentials(felhasználónév, jelszó)) {
                 // Login successful (without Firestore)
                 System.out.println("Login successful (offline mode).");
-                return true;
+                future.complete(true);
             } else {
                 // Invalid credentials
-                return false;
+                future.complete(false);
             }
         }
-        return false;
+        return future;
     }
 
     public boolean isLoggedIn() {
-        return firestoreService.isLoggedIn();
+        return firestoreService != null && firestoreService.isLoggedIn();
     }
 
     public String getLoggedInUser() {
-        return firestoreService.getLoggedInUser();
+        return firestoreService != null ? firestoreService.getLoggedInUser() : null;
     }
 
     public void logout() {
-        firestoreService.logout();
+        if (firestoreService != null) {
+            firestoreService.logout();
+        }
     }
 
     private boolean isValidCredentials(String felhasználónév, String jelszó) {

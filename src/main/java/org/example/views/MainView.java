@@ -10,9 +10,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MainView extends JPanel {
     private final AuthController authController;
@@ -51,34 +50,19 @@ public class MainView extends JPanel {
         gbc.gridx = 1;
         gbc.gridy = 0;
         festivalComboBox = new JComboBox<>();
-        festivalComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fetchCompanies();
-            }
-        });
+        festivalComboBox.addActionListener(e -> fetchCompanies());
         topPanel.add(festivalComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         installationRadioButton = new JRadioButton("Company_Install");
-        installationRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fetchCompanies();
-            }
-        });
+        installationRadioButton.addActionListener(e -> fetchCompanies());
         topPanel.add(installationRadioButton, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         demolitionRadioButton = new JRadioButton("Company_Demolition");
-        demolitionRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fetchCompanies();
-            }
-        });
+        demolitionRadioButton.addActionListener(e -> fetchCompanies());
         topPanel.add(demolitionRadioButton, gbc);
 
         ButtonGroup choiceButtonGroup = new ButtonGroup();
@@ -94,26 +78,29 @@ public class MainView extends JPanel {
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         logoutButton = new JButton("Logout");
-        logoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                logout();
-            }
-        });
+        logoutButton.addActionListener(e -> logout());
         bottomPanel.add(logoutButton);
 
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
     private void loadFestivals() {
-        List<String> festivals = taskController.getFestivals();
-        festivalComboBox.removeAllItems();
-        for (String festival : festivals) {
-            festivalComboBox.addItem(festival);
-        }
-        if (!festivals.isEmpty()) {
-            fetchCompanies();
-        }
+        taskController.getFestivals().thenAccept(festivals -> {
+            SwingUtilities.invokeLater(() -> {
+                festivalComboBox.removeAllItems();
+                for (String festival : festivals) {
+                    festivalComboBox.addItem(festival);
+                }
+                if (!festivals.isEmpty()) {
+                    fetchCompanies();
+                }
+            });
+        }).exceptionally(ex -> {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(this, "Failed to load festivals: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            });
+            return null;
+        });
     }
 
     public String getSelectedCollectionName() {
@@ -121,26 +108,26 @@ public class MainView extends JPanel {
     }
 
     public void setTasks(List<Task> companies) {
-        companyTableModel.setRowCount(0);
-        for (Task company : companies) {
-            Object[] rowData = {company.getId(), company.getCompanyName(), company.getLastModified(), company.getProgramName()};
-            companyTableModel.addRow(rowData);
-        }
+        SwingUtilities.invokeLater(() -> {
+            companyTableModel.setRowCount(0);
+            for (Task company : companies) {
+                Object[] rowData = {company.getId(), company.getCompanyName(), company.getLastModified(), company.getProgramName()};
+                companyTableModel.addRow(rowData);
+            }
+        });
     }
 
     private void fetchCompanies() {
         String selectedFestival = (String) festivalComboBox.getSelectedItem();
-        String collectionName = installationRadioButton.isSelected() ? "Company_Install" : "Company_Demolition";
-        List<Task> companies = taskController.getCompaniesByFestival(collectionName, selectedFestival);
-        setTasks(companies);
-    }
-
-    private void updateCompanyTable(List<Task> companies) {
-        companyTableModel.setRowCount(0);
-        for (Task company : companies) {
-            Object[] rowData = {company.getId(), company.getCompanyName(), company.getLastModified(), company.getProgramName()};
-            companyTableModel.addRow(rowData);
-        }
+        String collectionName = getSelectedCollectionName();
+        taskController.getCompaniesByFestival(collectionName, selectedFestival)
+                .thenAccept(this::setTasks)
+                .exceptionally(ex -> {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "Failed to fetch companies: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    });
+                    return null;
+                });
     }
 
     private void logout() {

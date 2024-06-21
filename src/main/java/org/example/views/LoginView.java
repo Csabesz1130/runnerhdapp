@@ -19,7 +19,7 @@ public class LoginView extends JPanel {
 
     private AuthController authController;
 
-    private JComboBox<String> felhasználónévComboBox;  // Use JComboBox for usernames
+    private JComboBox<String> felhasználónévComboBox;
     private JPasswordField jelszóPasswordField;
     private JButton bejelentkezésButton;
 
@@ -31,7 +31,7 @@ public class LoginView extends JPanel {
         FirestoreService firestoreService = new FirestoreService(firestore);
         this.authController = new AuthController(firestoreService, FELHASZNÁLÓNEVEK, JELSZÓ);
 
-        felhasználónévComboBox = new JComboBox<>(FELHASZNÁLÓNEVEK);  // Initialize JComboBox
+        felhasználónévComboBox = new JComboBox<>(FELHASZNÁLÓNEVEK);
         jelszóPasswordField = new JPasswordField(20);
         bejelentkezésButton = new JButton("Bejelentkezés");
 
@@ -41,12 +41,25 @@ public class LoginView extends JPanel {
                 String felhasználónév = (String) felhasználónévComboBox.getSelectedItem();
                 String jelszó = new String(jelszóPasswordField.getPassword());
 
-                if (authController.login(felhasználónév, jelszó)) {
-                    JOptionPane.showMessageDialog(null, "Sikeres bejelentkezés!");
-                    mainFrame.showMainView(); // Call showMainView() after successful login
-                } else {
-                    JOptionPane.showMessageDialog(null, "Hibás felhasználónév vagy jelszó!", "Hiba", JOptionPane.ERROR_MESSAGE);
-                }
+                authController.login(felhasználónév, jelszó)
+                        .thenAccept(loginSuccessful -> {
+                            if (loginSuccessful) {
+                                SwingUtilities.invokeLater(() -> {
+                                    JOptionPane.showMessageDialog(null, "Sikeres bejelentkezés!");
+                                    mainFrame.showMainView();
+                                });
+                            } else {
+                                SwingUtilities.invokeLater(() -> {
+                                    JOptionPane.showMessageDialog(null, "Hibás felhasználónév vagy jelszó!", "Hiba", JOptionPane.ERROR_MESSAGE);
+                                });
+                            }
+                        })
+                        .exceptionally(ex -> {
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(null, "Hiba történt a bejelentkezés során: " + ex.getMessage(), "Hiba", JOptionPane.ERROR_MESSAGE);
+                            });
+                            return null;
+                        });
             }
         });
 
@@ -59,7 +72,7 @@ public class LoginView extends JPanel {
         add(new JLabel("Felhasználónév:"), constraints);
 
         constraints.gridx = 1;
-        add(felhasználónévComboBox, constraints); // Add JComboBox instead of JTextField
+        add(felhasználónévComboBox, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 1;

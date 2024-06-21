@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class FirestoreService {
     private static final Logger logger = LoggerFactory.getLogger(FirestoreService.class);
+    private static final int QUERY_LIMIT = 100;
     private final Firestore db;
     private User loggedInUser;
 
@@ -24,24 +26,27 @@ public class FirestoreService {
         return db != null;
     }
 
-    public boolean login(String username, String password) {
-        if (db != null) {
-            CollectionReference usersCollection = db.collection("Users");
-            Query query = usersCollection.whereEqualTo("username", username).whereEqualTo("password", password);
-            ApiFuture<QuerySnapshot> future = query.get();
-            try {
-                QuerySnapshot snapshot = future.get();
-                if (!snapshot.isEmpty()) {
-                    loggedInUser = snapshot.getDocuments().get(0).toObject(User.class);
-                    return true;
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Failed to login user: {}", e.getMessage());
-            }
-        } else {
-            logger.error("Firestore is not initialized. Cannot login user.");
+    public void login(String username, String password, Consumer<Boolean> onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
         }
-        return false;
+
+        CollectionReference usersCollection = db.collection("Users");
+        Query query = usersCollection.whereEqualTo("username", username).whereEqualTo("password", password).limit(1);
+        ApiFuture<QuerySnapshot> future = query.get();
+        try {
+            QuerySnapshot querySnapshot = future.get();
+            if (!querySnapshot.isEmpty()) {
+                loggedInUser = querySnapshot.getDocuments().get(0).toObject(User.class);
+                onSuccess.accept(true);
+            } else {
+                onSuccess.accept(false);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to login user: {}", e.getMessage());
+            onFailure.accept(e);
+        }
     }
 
     public boolean isLoggedIn() {
@@ -49,145 +54,190 @@ public class FirestoreService {
     }
 
     public String getLoggedInUser() {
-        if (loggedInUser != null) {
-            return loggedInUser.getUsername();
-        }
-        return null;
+        return loggedInUser != null ? loggedInUser.getUsername() : null;
     }
 
     public void logout() {
         loggedInUser = null;
     }
 
-    public void addTask(String collection, Task task) {
-        if (db != null) {
-            db.collection(collection).add(task).addListener(() -> logger.info("Task added successfully."), Runnable::run);
-        } else {
-            logger.error("Firestore is not initialized. Cannot add task.");
+    public void addTask(String collection, Task task, Runnable onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<DocumentReference> future = db.collection(collection).add(task);
+        try {
+            DocumentReference documentReference = future.get();
+            logger.info("Task added successfully with ID: {}", documentReference.getId());
+            onSuccess.run();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error adding task: {}", e.getMessage());
+            onFailure.accept(e);
         }
     }
 
-    public void updateTask(String collection, String id, Task task) {
-        if (db != null) {
-            db.collection(collection).document(id).set(task).addListener(() -> logger.info("Task updated successfully."), Runnable::run);
-        } else {
-            logger.error("Firestore is not initialized. Cannot update task.");
+    public void updateTask(String collection, String id, Task task, Runnable onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<WriteResult> future = db.collection(collection).document(id).set(task);
+        try {
+            future.get();
+            logger.info("Task updated successfully");
+            onSuccess.run();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error updating task: {}", e.getMessage());
+            onFailure.accept(e);
         }
     }
 
-    public List<Task> getTasks(String collection) {
-        List<Task> tasks = new ArrayList<>();
-        if (db != null) {
-            CollectionReference tasksCollection = db.collection(collection);
-            ApiFuture<QuerySnapshot> future = tasksCollection.get();
-            try {
-                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-                for (QueryDocumentSnapshot document : documents) {
-                    Task task = document.toObject(Task.class);
-                    tasks.add(task);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Failed to retrieve tasks: {}", e.getMessage());
+    public void getTasks(String collection, Consumer<List<Task>> onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<QuerySnapshot> future = db.collection(collection).limit(QUERY_LIMIT).get();
+        try {
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            List<Task> tasks = new ArrayList<>();
+            for (QueryDocumentSnapshot document : documents) {
+                tasks.add(document.toObject(Task.class));
             }
-        } else {
-            logger.error("Firestore is not initialized. Cannot retrieve tasks.");
+            onSuccess.accept(tasks);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error getting tasks: {}", e.getMessage());
+            onFailure.accept(e);
         }
-        return tasks;
     }
 
-    public List<String> getFestivals() {
-        List<String> festivals = new ArrayList<>();
-        if (db != null) {
-            CollectionReference programsCollection = db.collection("Programs");
-            try {
-                QuerySnapshot querySnapshot = programsCollection.get().get();
-                for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
-                    String festivalName = document.getString("ProgramName");
+    public void getFestivals(Consumer<List<String>> onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<QuerySnapshot> future = db.collection("Programs").limit(QUERY_LIMIT).get();
+        try {
+            QuerySnapshot querySnapshot = future.get();
+            List<String> festivals = new ArrayList<>();
+            for (QueryDocumentSnapshot document : querySnapshot) {
+                String festivalName = document.getString("ProgramName");
+                if (festivalName != null) {
                     festivals.add(festivalName);
                 }
-            } catch (Exception e) {
-                logger.error("Error retrieving festivals: {}", e.getMessage());
             }
-        } else {
-            logger.error("Firestore is not initialized. Cannot retrieve festivals.");
+            onSuccess.accept(festivals);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error getting festivals: {}", e.getMessage());
+            onFailure.accept(e);
         }
-        return festivals;
     }
 
-    public List<Task> getCompaniesByFestival(String collectionName, String festivalName) {
-        List<Task> companies = new ArrayList<>();
-        if (db != null) {
-            //collectionName = "Company_Install";
-            CollectionReference companiesCollection = db.collection(collectionName);
-            Query query = companiesCollection.whereEqualTo("ProgramName", festivalName);
-            ApiFuture<QuerySnapshot> future = query.get();
-            try {
-                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-                for (QueryDocumentSnapshot document : documents) {
-                    Task company = document.toObject(Task.class);
-                    companies.add(company);
+    public void getCompaniesByFestival(String collectionName, String festivalName, Consumer<List<Task>> onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<QuerySnapshot> future = db.collection(collectionName)
+                .whereEqualTo("ProgramName", festivalName)
+                .limit(QUERY_LIMIT)
+                .get();
+        try {
+            QuerySnapshot querySnapshot = future.get();
+            List<Task> companies = new ArrayList<>();
+            for (QueryDocumentSnapshot document : querySnapshot) {
+                companies.add(document.toObject(Task.class));
+            }
+            onSuccess.accept(companies);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error getting companies by festival: {}", e.getMessage());
+            onFailure.accept(e);
+        }
+    }
+
+    public void getCompanyById(String collectionName, String companyId, Consumer<Task> onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<DocumentSnapshot> future = db.collection(collectionName).document(companyId).get();
+        try {
+            DocumentSnapshot documentSnapshot = future.get();
+            if (documentSnapshot.exists()) {
+                Task company = documentSnapshot.toObject(Task.class);
+                onSuccess.accept(company);
+            } else {
+                onFailure.accept(new Exception("Company not found"));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error getting company by ID: {}", e.getMessage());
+            onFailure.accept(e);
+        }
+    }
+
+    public void createCompany(String collectionName, Task company, Runnable onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<WriteResult> future = db.collection(collectionName).document(company.getId()).set(company);
+        try {
+            future.get();
+            logger.info("Company created successfully");
+            onSuccess.run();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error creating company: {}", e.getMessage());
+            onFailure.accept(e);
+        }
+    }
+
+    public void getEquipmentList(String collectionName, String companyId, Consumer<List<Task.Equipment>> onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
+        }
+
+        ApiFuture<DocumentSnapshot> future = db.collection(collectionName).document(companyId).get();
+        try {
+            DocumentSnapshot documentSnapshot = future.get();
+            if (documentSnapshot.exists()) {
+                Task company = documentSnapshot.toObject(Task.class);
+                if (company != null && company.getEquipmentList() != null) {
+                    onSuccess.accept(company.getEquipmentList());
+                } else {
+                    onSuccess.accept(new ArrayList<>());
                 }
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Failed to retrieve companies: {}", e.getMessage());
+            } else {
+                onFailure.accept(new Exception("Company not found"));
             }
-        } else {
-            logger.error("Firestore is not initialized. Cannot retrieve companies.");
-        }
-        return companies;
-    }
-
-    public Task getCompanyById(String collectionName, String companyId) {
-        if (db != null) {
-            DocumentReference companyDocument = db.collection(collectionName).document(companyId);
-            try {
-                DocumentSnapshot documentSnapshot = companyDocument.get().get();
-                if (documentSnapshot.exists()) {
-                    return documentSnapshot.toObject(Task.class);
-                }
-            } catch (Exception e) {
-                logger.error("Error retrieving company: {}", e.getMessage());
-            }
-        } else {
-            logger.error("Firestore is not initialized. Cannot retrieve company.");
-        }
-        return null;
-    }
-
-    public void createCompany(String collectionName, Task company) {
-        if (db != null) {
-            db.collection(collectionName).document(company.getId()).set(company).addListener(() -> logger.info("Company created successfully."), Runnable::run);
-        } else {
-            logger.error("Firestore is not initialized. Cannot create company.");
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error getting equipment list: {}", e.getMessage());
+            onFailure.accept(e);
         }
     }
 
-    public List<Task.Equipment> getEquipmentList(String collectionName, String companyId) {
-        List<Task.Equipment> equipmentList = new ArrayList<>();
-        if (db != null) {
-            DocumentReference companyDocument = db.collection(collectionName).document(companyId);
-            try {
-                DocumentSnapshot documentSnapshot = companyDocument.get().get();
-                if (documentSnapshot.exists()) {
-                    Task company = documentSnapshot.toObject(Task.class);
-                    if (company != null) {
-                        equipmentList = company.getEquipmentList();
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error retrieving equipment list: {}", e.getMessage());
-            }
-        } else {
-            logger.error("Firestore is not initialized. Cannot retrieve equipment list.");
+    public void updateEquipmentList(String collectionName, String companyId, List<Task.Equipment> equipmentList, Runnable onSuccess, Consumer<Exception> onFailure) {
+        if (db == null) {
+            onFailure.accept(new IllegalStateException("Firestore is not initialized"));
+            return;
         }
-        return equipmentList;
-    }
 
-    public void updateEquipmentList(String collectionName, String companyId, List<Task.Equipment> equipmentList) {
-        if (db != null) {
-            db.collection(collectionName).document(companyId).update("equipmentList", equipmentList)
-                    .addListener(() -> logger.info("Equipment list updated successfully."), Runnable::run);
-        } else {
-            logger.error("Firestore is not initialized. Cannot update equipment list.");
+        ApiFuture<WriteResult> future = db.collection(collectionName).document(companyId).update("equipmentList", equipmentList);
+        try {
+            future.get();
+            logger.info("Equipment list updated successfully");
+            onSuccess.run();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error updating equipment list: {}", e.getMessage());
+            onFailure.accept(e);
         }
     }
 }

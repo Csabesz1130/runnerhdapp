@@ -1,11 +1,12 @@
+// Task.java
 package org.example.models;
 
 import com.google.cloud.firestore.annotation.PropertyName;
-import java.util.List;
 import com.google.cloud.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 
 public class Task {
     private String id;
@@ -14,12 +15,14 @@ public class Task {
     private String companyName;
     private List<Equipment> equipmentList;
     private Map<String, Object> dynamicFields;
+    private String statusz;
+    private String megjegyzes;
 
     public Task() {
         this.dynamicFields = new HashMap<>();
+        this.equipmentList = new ArrayList<>();
     }
 
-    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -82,7 +85,22 @@ public class Task {
         return this.dynamicFields.get(key);
     }
 
-    // Inner class for Equipment
+    public void setStatusz(String ujStatusz) {
+        this.statusz = ujStatusz;
+    }
+
+    public String getStatusz() {
+        return this.statusz;
+    }
+
+    public void setMegjegyzes(String megjegyzes) {
+        this.megjegyzes = megjegyzes;
+    }
+
+    public String getMegjegyzes() {
+        return this.megjegyzes;
+    }
+
     public static class Equipment {
         private Map<String, Object> dynamicFields;
         private String snDid;

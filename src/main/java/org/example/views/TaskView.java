@@ -49,7 +49,22 @@ public class TaskView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String ujStatusz = (String) statuszComboBox.getSelectedItem();
                 String megjegyzes = megjegyzesTextArea.getText();
-                taskController.updateTask(task, ujStatusz, megjegyzes);
+
+                task.setStatusz(ujStatusz);
+                task.setMegjegyzes(megjegyzes);
+
+                taskController.updateTask(task)
+                        .thenRun(() -> {
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(TaskView.this, "Task frissítve sikeresen!", "Siker", JOptionPane.INFORMATION_MESSAGE);
+                            });
+                        })
+                        .exceptionally(ex -> {
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(TaskView.this, "Hiba történt a task frissítése során: " + ex.getMessage(), "Hiba", JOptionPane.ERROR_MESSAGE);
+                            });
+                            return null;
+                        });
             }
         });
     }

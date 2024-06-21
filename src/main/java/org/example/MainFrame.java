@@ -14,7 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MainFrame extends JFrame {
     private TaskController taskController;
@@ -89,12 +89,18 @@ public class MainFrame extends JFrame {
     }
 
     private void loadTasksFromFirestore() {
-        try {
-            List<Task> tasks = taskController.getAllTasks();
-            mainView.setTasks(tasks);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to load tasks from Firestore: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        taskController.getAllTasks()
+                .thenAccept(tasks -> {
+                    SwingUtilities.invokeLater(() -> {
+                        mainView.setTasks(tasks);
+                    });
+                })
+                .exceptionally(ex -> {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "Failed to load tasks from Firestore: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    });
+                    return null;
+                });
     }
 
     private void initMenuBar() {

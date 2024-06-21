@@ -12,11 +12,18 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.slf4j:slf4j-simple:1.7.30'
+    implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
+    implementation 'com.google.protobuf:protobuf-java:3.21.1'
     //classpath 'com.google.gms:google-services:4.3.10'
+    implementation 'com.google.firebase:firebase-firestore:24.1.2'
     implementation 'org.apache.poi:poi:5.2.3'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation 'com.google.firebase:firebase-admin:8.1.0'
     implementation 'com.google.cloud:google-cloud-firestore:2.5.0'
+    //implementation 'com.google.firebase:firebase-firestore:22.1.2'
+    implementation 'io.grpc:grpc-auth:1.47.0'
+    implementation 'io.grpc:grpc-netty-shaded:1.47.0'
     // Google API Client Library
     implementation 'com.google.api-client:google-api-client:1.31.5'
     implementation 'com.google.oauth-client:google-oauth-client:1.32.1' // Updated version
@@ -39,3 +46,4 @@ test {
     useJUnitPlatform()
 }
 
+//--warning-mode all
